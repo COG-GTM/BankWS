@@ -2,12 +2,14 @@ package com.github.rshtishi.bankws.entity;
 
 import java.time.LocalDateTime;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import com.github.rshtishi.bankws.enums.ActionType;
 
@@ -28,6 +30,7 @@ public class Transaction {
 	private String client;
 	private LocalDateTime date;
 	private double amount;
+	@Enumerated(EnumType.STRING)
 	@Column(name="action_type")
 	private ActionType actionType;
 
