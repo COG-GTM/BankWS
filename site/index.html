@@ -358,13 +358,13 @@ FROM {{ ref('stg_orders') }}</code></pre>
 
 <script>
 // ── Access Code Gate ──
-const ACCESS_CODE = new URLSearchParams(window.location.search).get('code') ||
-                    (typeof window.__VERCEL_ENV !== 'undefined' ? '' : '2024');
+// The expected code is hardcoded here. Change before each demo session.
+const EXPECTED_CODE = '2024';
 
-// Check session or query param
+// Check session or query param bypass (?code=2024)
 (function() {
   const params = new URLSearchParams(window.location.search);
-  if (params.get('code') && params.get('code') === getExpectedCode()) {
+  if (params.get('code') && params.get('code') === EXPECTED_CODE) {
     unlock();
     return;
   }
@@ -375,8 +375,7 @@ const ACCESS_CODE = new URLSearchParams(window.location.search).get('code') ||
 })();
 
 function getExpectedCode() {
-  // Uses ACCESS_CODE which supports query param override
-  return ACCESS_CODE;
+  return EXPECTED_CODE;
 }
 
 function unlock() {
