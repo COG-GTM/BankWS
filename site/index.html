@@ -240,7 +240,7 @@ customer_payments as (
     select orders.customer_id,
         sum(payments.amount) as total_amount
     from {{ ref('stg_payments') }} as payments
-    inner join {{ ref('stg_orders') }} as orders
+    left join {{ ref('stg_orders') }} as orders
         on payments.order_id = orders.order_id
     group by orders.customer_id
 ),
@@ -375,8 +375,8 @@ const ACCESS_CODE = new URLSearchParams(window.location.search).get('code') ||
 })();
 
 function getExpectedCode() {
-  // Default code; override via Vercel env var at build time
-  return '2024';
+  // Uses ACCESS_CODE which supports query param override
+  return ACCESS_CODE;
 }
 
 function unlock() {
