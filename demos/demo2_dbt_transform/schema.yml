@@ -1,0 +1,62 @@
+version: 2
+
+models:
+  - name: customers
+    description: >
+      Customer Profiles data product — one row per customer with order
+      history summary, lifetime value, and derived customer_status.
+      This model feeds the Customer Profiles entry in the data catalogue.
+    tags:
+      - customer_profiles
+      - data_product
+
+    columns:
+      - name: customer_id
+        description: Primary key — unique identifier for each customer.
+        tests:
+          - unique
+          - not_null
+
+      - name: first_name
+        description: Customer's first name from the source system.
+        tests:
+          - not_null
+
+      - name: last_name
+        description: Customer's last name from the source system.
+        tests:
+          - not_null
+
+      - name: first_order_date
+        description: >
+          Date of the customer's earliest order. NULL for prospects
+          who have not yet placed an order.
+
+      - name: most_recent_order_date
+        description: >
+          Date of the customer's most recent order. NULL for prospects.
+
+      - name: number_of_orders
+        description: >
+          Total number of orders placed by the customer. NULL for
+          prospects (coalesce to 0 downstream if needed).
+
+      - name: customer_lifetime_value
+        description: >
+          Total payment amount across all of the customer's orders,
+          expressed in the base currency. Defaults to 0 when no
+          payments exist.
+        tests:
+          - not_null
+
+      - name: customer_status
+        description: >
+          Derived status based on order history. Values:
+          'prospect' — no orders placed;
+          'new' — exactly one order;
+          'active' — most recent order within the last 90 days;
+          'lapsed' — most recent order older than 90 days.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['prospect', 'new', 'active', 'lapsed']

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Devin for Data Engineering — Demo</title>
+<style>
+  :root {
+    --bg: #0F172A; --surface: #1E293B; --border: #334155;
+    --text: #CBD5E1; --text-bright: #E2E8F0; --blue: #22D3EE;
+    --orange: #60A5FA; --green: #4ADE80; --red: #F87171;
+    --indigo: #818CF8; --purple: #A78BFA; --muted: #94A3B8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, Roboto, 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); }
+
+  /* ── Access Gate ── */
+  #gate {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; flex-direction: column; gap: 24px;
+  }
+  #gate h1 { color: var(--blue); font-size: 24px; }
+  #gate p { color: var(--text); font-size: 14px; opacity: 0.7; }
+  #gate .code-input {
+    display: flex; gap: 12px; margin-top: 8px;
+  }
+  #gate .code-input input {
+    width: 52px; height: 64px; text-align: center; font-size: 28px; font-weight: 700;
+    background: var(--surface); border: 2px solid var(--border); border-radius: 12px;
+    color: var(--text-bright); outline: none; caret-color: var(--blue);
+  }
+  #gate .code-input input:focus { border-color: var(--blue); }
+  #gate .error { color: var(--red); font-size: 13px; min-height: 20px; }
+  #gate .logo { font-size: 40px; margin-bottom: 8px; }
+
+  /* ── Main Content ── */
+  #content { display: none; }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px 64px; }
+  header { text-align: center; padding: 48px 24px 32px; border-bottom: 1px solid var(--border); }
+  header h1 { color: var(--blue); font-size: 28px; margin-bottom: 8px; }
+  header p { color: var(--text); font-size: 15px; max-width: 720px; margin: 0 auto; line-height: 1.6; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-right: 6px; vertical-align: middle; }
+  .badge-v1 { background: #22D3EE; color: #0F172A; }
+  .badge-v2 { background: #4ADE80; color: #0F172A; }
+  .badge-fix { background: var(--red); color: #fff; }
+  .badge-escalate { background: #60A5FA; color: #0F172A; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-top: 32px; }
+  .tab {
+    padding: 12px 24px; cursor: pointer; font-size: 14px; font-weight: 600;
+    color: var(--text); border-bottom: 2px solid transparent; margin-bottom: -2px;
+    transition: all 0.15s;
+  }
+  .tab:hover { color: var(--text-bright); }
+  .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+  .tab-panel { display: none; padding-top: 24px; }
+  .tab-panel.active { display: block; }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 16px 0; }
+  .card h3 { color: var(--green); font-size: 16px; margin-bottom: 12px; }
+  .card p { font-size: 14px; line-height: 1.6; }
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 16px; overflow-x: auto; font-size: 13px; line-height: 1.55; color: var(--text-bright); margin: 12px 0; }
+  code { font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace; }
+  .hl { color: var(--green); font-weight: bold; }
+  .warn { color: var(--orange); font-weight: bold; }
+  .info { color: var(--blue); }
+
+  /* Table */
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 13px; }
+  th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+  th { background: var(--surface); color: var(--blue); font-weight: 600; }
+
+  /* Section titles */
+  h2 { color: #FFFFFF; font-size: 22px; margin-bottom: 8px; font-weight: 500; }
+  .section-desc { font-style: italic; color: var(--text); font-size: 14px; margin-bottom: 16px; }
+
+  /* Escalation callout */
+  .callout { border-left: 4px solid #60A5FA; background: rgba(96,165,250,0.08); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 13px; }
+  .callout strong { color: #60A5FA; }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+  footer { text-align: center; padding: 24px; color: var(--text); opacity: 0.5; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ ACCESS GATE ═══════════════════════ -->
+<div id="gate">
+  <div class="logo">&#x1f916;</div>
+  <h1>Devin for Data Engineering</h1>
+  <p>Enter the 4-digit access code to view the demo</p>
+  <div class="code-input">
+    <input id="c1" maxlength="1" autofocus inputmode="numeric" pattern="[0-9]">
+    <input id="c2" maxlength="1" inputmode="numeric" pattern="[0-9]">
+    <input id="c3" maxlength="1" inputmode="numeric" pattern="[0-9]">
+    <input id="c4" maxlength="1" inputmode="numeric" pattern="[0-9]">
+  </div>
+  <div class="error" id="error"></div>
+</div>
+
+<!-- ═══════════════════════ MAIN CONTENT ═══════════════════════ -->
+<div id="content">
+  <header>
+    <h1>Barclays EDP Demo — Devin for Data Engineering</h1>
+    <p>Three demos showing how Devin accelerates the data engineering workload
+       that sits between the data-as-a-product vision and production reality.</p>
+  </header>
+
+  <div class="container">
+    <div class="tabs">
+      <div class="tab active" data-tab="demo1">Demo 1 — Ingestion</div>
+      <div class="tab" data-tab="demo2">Demo 2 — dbt Transform</div>
+      <div class="tab" data-tab="demo3">Demo 3 — Pipeline Triage</div>
+    </div>
+
+    <!-- ============ DEMO 1 ============ -->
+    <div class="tab-panel active" id="demo1">
+      <h2>Data Ingestion + Schema Change</h2>
+      <p class="section-desc">Devin builds a connector from a public data source into a target schema,
+        then handles a schema change automatically — the kind of work that normally takes a data engineer a day or more.</p>
+
+      <div class="card">
+        <h3><span class="badge badge-v1">V1</span> Base Connector — GitHub API &rarr; SQLite</h3>
+        <p>Devin writes a Python ingestion script that extracts repo name, description, language,
+          star count, and last updated date from the GitHub API, and loads it into a local SQLite table.</p>
+<pre><code><span class="info">$ python ingest_repos.py</span>
+
+Fetching repositories for 'dbt-labs' from GitHub API...
+  -&gt; Retrieved <span class="hl">396 repositories</span>.
+  -&gt; Loaded <span class="hl">396 rows</span> into raw_repos table.
+
+Top 5 repos by stars:
+  dbt-core                       12,450 stars
+  dbt-utils                       1,718 stars
+  metricflow                      1,527 stars
+  dbt-fusion                        667 stars
+  dbt-codegen                       644 stars
+
+Done. Database saved to raw_repos.db</code></pre>
+      </div>
+
+      <div class="card">
+        <h3><span class="badge badge-v2">V2</span> Schema Evolution — Adding <code>forks_count</code></h3>
+        <p>The upstream source has added a new field. Devin detects the schema change, updates the script,
+          alters the table definition, and re-runs without breaking existing data.</p>
+<pre><code><span class="info">$ python ingest_repos_v2_schema_change.py</span>
+
+Fetching repositories for 'dbt-labs' from GitHub API...
+  -&gt; Retrieved <span class="hl">396 repositories</span>.
+
+  <span class="warn">[SCHEMA CHANGE] Adding 'forks_count' column to raw_repos...</span>
+  <span class="hl">[SCHEMA CHANGE] Column added successfully.</span>
+
+  -&gt; Loaded <span class="hl">396 rows</span> into raw_repos table (with forks_count).
+
+Top 5 repos by stars (now including forks):
+  dbt-core                       12,450 stars  |  2,323 forks
+  dbt-utils                       1,718 stars  |    609 forks
+  metricflow                      1,527 stars  |    159 forks
+  dbt-fusion                        667 stars  |    100 forks
+  dbt-codegen                       644 stars  |    131 forks
+
+Done. Database saved to raw_repos.db</code></pre>
+        <p class="info" style="margin-top:8px; font-size:13px;">The schema migration detected the missing column, added it via ALTER TABLE,
+          and re-ingested without breaking existing data.</p>
+      </div>
+    </div>
+
+    <!-- ============ DEMO 2 ============ -->
+    <div class="tab-panel" id="demo2">
+      <h2>Transform SQL into a dbt Model</h2>
+      <p class="section-desc">Devin takes raw SQL transformation logic and converts it into a clean,
+        documented dbt model that maps to a data product contract — the core of migrating from legacy jobs.</p>
+
+      <div class="card">
+        <h3>Before: Raw SQL (jaffle_shop customers.sql)</h3>
+<pre><code>with customers as (
+    select * from {{ ref('stg_customers') }}
+),
+orders as (
+    select * from {{ ref('stg_orders') }}
+),
+payments as (
+    select * from {{ ref('stg_payments') }}
+),
+customer_orders as (
+    select customer_id,
+        min(order_date) as first_order,
+        max(order_date) as most_recent_order,
+        count(order_id) as number_of_orders
+    from orders
+    group by customer_id
+),
+customer_payments as (
+    select orders.customer_id,
+        sum(amount) as total_amount
+    from payments
+    left join orders on payments.order_id = orders.order_id
+    group by orders.customer_id
+),
+final as (
+    select customers.customer_id, customers.first_name, customers.last_name,
+        customer_orders.first_order, customer_orders.most_recent_order,
+        customer_orders.number_of_orders,
+        customer_payments.total_amount as customer_lifetime_value
+    from customers
+    left join customer_orders on customers.customer_id = customer_orders.customer_id
+    left join customer_payments on customers.customer_id = customer_payments.customer_id
+)
+select * from final</code></pre>
+      </div>
+
+      <div class="card">
+        <h3>After: Clean dbt Model with Derived Fields</h3>
+        <p>Devin rewrites the model with clear structure, self-documenting comments, and adds the
+          <code>customer_status</code> field required by the Customer Profiles data product contract.</p>
+<pre><code>{{ config(materialized = 'table', tags = ['customer_profiles', 'data_product']) }}
+
+<span class="info">-- Step 1: Pull base customer attributes from the staging layer.</span>
+with customers as (
+    select customer_id, first_name, last_name
+    from {{ ref('stg_customers') }}
+),
+
+<span class="info">-- Step 2: Aggregate order-level metrics per customer.</span>
+customer_orders as (
+    select customer_id,
+        min(order_date) as first_order_date,
+        max(order_date) as most_recent_order_date,
+        count(order_id) as number_of_orders
+    from {{ ref('stg_orders') }}
+    group by customer_id
+),
+
+<span class="info">-- Step 3: Aggregate payment totals per customer.</span>
+customer_payments as (
+    select orders.customer_id,
+        sum(payments.amount) as total_amount
+    from {{ ref('stg_payments') }} as payments
+    left join {{ ref('stg_orders') }} as orders
+        on payments.order_id = orders.order_id
+    group by orders.customer_id
+),
+
+<span class="info">-- Step 4: Join all CTEs and compute derived fields.</span>
+final as (
+    select
+        customers.customer_id,
+        customers.first_name,
+        customers.last_name,
+        customer_orders.first_order_date,
+        customer_orders.most_recent_order_date,
+        customer_orders.number_of_orders,
+        coalesce(customer_payments.total_amount, 0) as customer_lifetime_value,
+
+        <span class="hl">-- Derived: customer_status (required by Customer Profiles contract)</span>
+        <span class="hl">case</span>
+            <span class="hl">when customer_orders.customer_id is null then 'prospect'</span>
+            <span class="hl">when customer_orders.number_of_orders = 1  then 'new'</span>
+            <span class="hl">when most_recent_order_date &gt;= dateadd('day', -90, current_date)</span>
+                <span class="hl">then 'active'</span>
+            <span class="hl">else 'lapsed'</span>
+        <span class="hl">end as customer_status</span>
+
+    from customers
+    left join customer_orders on customers.customer_id = customer_orders.customer_id
+    left join customer_payments on customers.customer_id = customer_payments.customer_id
+)
+select * from final</code></pre>
+      </div>
+
+      <div class="card">
+        <h3>Generated schema.yml — Catalogue-Ready Documentation</h3>
+        <p>Everything needed to publish this to a data catalogue — column names, descriptions,
+          and data quality tests — generated automatically as a by-product of the build.</p>
+        <table>
+          <tr><th>Column</th><th>Description</th><th>Tests</th></tr>
+          <tr><td><code>customer_id</code></td><td>Primary key — unique identifier</td><td>unique, not_null</td></tr>
+          <tr><td><code>first_name</code></td><td>Customer's first name</td><td>not_null</td></tr>
+          <tr><td><code>last_name</code></td><td>Customer's last name</td><td>not_null</td></tr>
+          <tr><td><code>first_order_date</code></td><td>Date of earliest order</td><td>—</td></tr>
+          <tr><td><code>most_recent_order_date</code></td><td>Date of most recent order</td><td>—</td></tr>
+          <tr><td><code>number_of_orders</code></td><td>Total orders placed</td><td>—</td></tr>
+          <tr><td><code>customer_lifetime_value</code></td><td>Total payment amount (base currency)</td><td>not_null</td></tr>
+          <tr><td style="color:var(--green);font-weight:700"><code>customer_status</code></td>
+              <td style="color:var(--green);font-weight:700">Derived: prospect / new / active / lapsed</td>
+              <td style="color:var(--green);font-weight:700">not_null, accepted_values</td></tr>
+        </table>
+        <p class="info" style="margin-top:8px; font-size:13px;">7 data quality tests total across all columns.</p>
+      </div>
+    </div>
+
+    <!-- ============ DEMO 3 ============ -->
+    <div class="tab-panel" id="demo3">
+      <h2>Pipeline Triage</h2>
+      <p class="section-desc">Devin investigates a broken dbt model, identifies the root cause, patches the test,
+        and explains what it did — the kind of first-response triage that currently pulls engineers away from product work.</p>
+
+      <div class="card">
+        <h3><span class="badge badge-fix">FIX 1</span> Autonomous Fix — Column Typo</h3>
+        <p><strong>CI Error:</strong> <code>column 'custmer_id' does not exist</code></p>
+<pre><code><span class="warn">-- BROKEN:</span>
+SELECT customer_id, SUM(amount) AS total_revenue, COUNT(order_id) AS order_count
+FROM {{ ref('orders') }}
+GROUP BY <span class="warn">custmer_id</span>    &larr; typo: missing 'o'
+
+<span class="hl">-- FIXED (by Devin):</span>
+SELECT customer_id, SUM(amount) AS total_revenue, COUNT(order_id) AS order_count
+FROM {{ ref('orders') }}
+GROUP BY <span class="hl">customer_id</span>   &larr; corrected</code></pre>
+        <p style="margin-top:8px"><span class="hl">Resolution:</span> Autonomous fix — no business decision required.
+          Devin spots the typo, explains why it fails, and produces the corrected model.</p>
+      </div>
+
+      <hr>
+
+      <div class="card">
+        <h3><span class="badge badge-escalate">FIX 2</span> Escalation — Guest Checkout Handling</h3>
+        <p><strong>CI Error:</strong> <code>not_null test failed for customer_id in orders model</code></p>
+        <p style="margin-top:8px"><strong>Root Cause:</strong> The source table recently added rows where
+          <code>customer_id</code> can be NULL for guest checkouts.</p>
+
+        <table style="margin-top:16px">
+          <tr><th>Option</th><th>Approach</th><th>Pros</th><th>Cons</th></tr>
+          <tr><td>A</td><td>Filter out NULLs</td><td>Simple, preserves test</td><td>Loses guest order data</td></tr>
+          <tr><td style="color:var(--green);font-weight:700">B (Recommended)</td>
+              <td>COALESCE to sentinel (-1)</td><td>Preserves all data, keeps test</td><td>Magic number downstream</td></tr>
+          <tr><td>C</td><td>Separate guest model</td><td>Cleanest design</td><td>Requires downstream refactoring</td></tr>
+        </table>
+
+<pre><code><span class="hl">-- RECOMMENDED FIX (Option B):</span>
+SELECT
+    order_id,
+    <span class="hl">coalesce(customer_id, -1) AS customer_id,</span>   -- guest sentinel
+    order_date,
+    status,
+    amount,
+    <span class="hl">case when customer_id is null then true</span>
+    <span class="hl">     else false end as is_guest_checkout</span>      -- downstream flag
+FROM {{ ref('stg_orders') }}</code></pre>
+
+        <div class="callout">
+          <strong>Escalation Boundary:</strong> Devin recommends Option B but asks for engineer
+          confirmation before applying. The choice of sentinel value (-1 vs. a dedicated 'guest'
+          dimension key) is a business decision. This is what makes Devin safe to run autonomously
+          — it knows when a fix requires a human decision and stops to ask.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>Devin by Cognition AI &mdash; Demo Build</footer>
+</div>
+
+<script>
+// ── Access Code Gate ──
+// The expected code is hardcoded here. Change before each demo session.
+const EXPECTED_CODE = '2024';
+
+// Check session or query param bypass (?code=2024)
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('code') && params.get('code') === EXPECTED_CODE) {
+    unlock();
+    return;
+  }
+  if (sessionStorage.getItem('demo_unlocked') === 'true') {
+    unlock();
+    return;
+  }
+})();
+
+function getExpectedCode() {
+  return EXPECTED_CODE;
+}
+
+function unlock() {
+  sessionStorage.setItem('demo_unlocked', 'true');
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
+}
+
+// Code input handling
+const inputs = [document.getElementById('c1'), document.getElementById('c2'),
+                document.getElementById('c3'), document.getElementById('c4')];
+
+inputs.forEach((inp, i) => {
+  inp.addEventListener('input', (e) => {
+    const val = e.target.value.replace(/\D/g, '');
+    e.target.value = val;
+    if (val && i < 3) inputs[i + 1].focus();
+    checkCode();
+  });
+  inp.addEventListener('keydown', (e) => {
+    if (e.key === 'Backspace' && !e.target.value && i > 0) {
+      inputs[i - 1].focus();
+    }
+  });
+  inp.addEventListener('paste', (e) => {
+    e.preventDefault();
+    const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+    for (let j = 0; j < 4 && j < paste.length; j++) {
+      inputs[j].value = paste[j];
+    }
+    if (paste.length >= 4) inputs[3].focus();
+    checkCode();
+  });
+});
+
+function checkCode() {
+  const code = inputs.map(i => i.value).join('');
+  if (code.length === 4) {
+    if (code === getExpectedCode()) {
+      unlock();
+    } else {
+      document.getElementById('error').textContent = 'Incorrect code. Please try again.';
+      inputs.forEach(i => { i.value = ''; i.style.borderColor = '#da3633'; });
+      setTimeout(() => { inputs.forEach(i => i.style.borderColor = ''); }, 800);
+      inputs[0].focus();
+    }
+  } else {
+    document.getElementById('error').textContent = '';
+  }
+}
+
+// ── Tab Navigation ──
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
