@@ -67,7 +67,7 @@ server.port=8080
 | Method | Path | Description |
 | --- | --- | --- |
 | GET | `/transactions` | Returns all the transactions. |
-| GET | `/transactions/client/{client}` | Returns the transactions of the given client. |
+| GET | `/transactions/client/{client}` | Returns the transactions of the given client. Responds with 200 and an empty array when the client is unknown or has no transactions. |
 
 Example:
 ```
