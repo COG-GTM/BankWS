@@ -11,7 +11,7 @@ public class SoapProperties {
 	private Endpoint endpoint = new Endpoint();
 	
 	@Data
-	public class Endpoint {
+	public static class Endpoint {
 		private String host;
 		private int port;
 		private String name;
