@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,9 @@ class SoapPublisherTest {
 	void testWsdlIsPublished() throws Exception {
 		String url = "http://" + soapProperties.getEndpoint().getHost() + ":" + soapProperties.getEndpoint().getPort()
 				+ "/" + soapProperties.getEndpoint().getName() + "?wsdl";
-		HttpResponse<String> response = HttpClient.newHttpClient()
-				.send(HttpRequest.newBuilder(URI.create(url)).GET().build(), HttpResponse.BodyHandlers.ofString());
+		HttpResponse<String> response = HttpClient.newHttpClient().send(
+				HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(10)).GET().build(),
+				HttpResponse.BodyHandlers.ofString());
 
 		assertTrue(response.statusCode() == 200);
 		assertTrue(response.body().contains("getTrasactionsForClient"));
