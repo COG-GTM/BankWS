@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.3.0.RELEASE</version>
+		<version>3.3.13</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.github.rshtishi</groupId>
@@ -16,7 +16,10 @@
 	<description>Bank Web Service</description>
 
 	<properties>
-		<java.version>11</java.version>
+		<java.version>21</java.version>
+		<jaxws.version>4.0.3</jaxws.version>
+		<!-- ahead of the version managed by Spring Boot 3.3.13 (10.1.42) to pick up Tomcat security fixes -->
+		<tomcat.version>10.1.55</tomcat.version>
 	</properties>
 
 	<dependencies>
@@ -51,13 +54,19 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.12</version><!--$NO-MVN-MAN-VER$ -->
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
+			<exclusions>
+				<!-- Liquibase pulls the legacy javax JAXB API; the jakarta API from jaxws-rt is used instead -->
+				<exclusion>
+					<groupId>javax.xml.bind</groupId>
+					<artifactId>jaxb-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -68,9 +77,8 @@
 
 		<dependency>
 			<groupId>com.sun.xml.ws</groupId>
-			<artifactId>jaxws-ri</artifactId>
-			<version>2.3.0</version>
-			<type>pom</type>
+			<artifactId>jaxws-rt</artifactId>
+			<version>${jaxws.version}</version>
 		</dependency>
 
 		<dependency>
