@@ -12,14 +12,22 @@ to expose the information from the core system of the bank in safe manner to all
 ## Technology
 
 BankWS is using the following technologies:
-- Java [version: 11] (the language used to write the application)
+- Java [version: 21] (the language used to write the application)
 - Maven [version:3.6] (the tool for managing dependencies and building the project) 
-- Lombok [version:1.18.12] (the java library for removing boiler plate code from pojos)
-- Spring-Boot [version:2.3.0.RELEASE] (the framework for creating spring application that just run)
-- Spring-Data [version:2.3.0.RELEASE] (the framework for interacting with database)
-- H2 Database [version:1.4.2] (the database we use for storing the information in development enviroment)
-- Liquibase [version:3.8.9] (the tool for keeping the version control for relational databases)
-- JAX-WS [version:2.3.0] (the library for exposing soap web service endpoints)
+- Lombok [version:1.18.46, Spring Boot-managed] (the java library for removing boiler plate code from pojos)
+- Spring-Boot [version:3.5.16] (the framework for creating spring application that just run)
+- Spring-Data [version:3.5.x] (the framework for interacting with database)
+- H2 Database [version:2.x] (the database we use for storing the information in development enviroment)
+- Liquibase [version:4.x] (the tool for keeping the version control for relational databases)
+- JAX-WS [version:4.0.5, Jakarta] (the library for exposing soap web service endpoints)
+
+## Java 11 → 21 Migration
+
+- Upgraded Spring Boot from 2.3.0 to 3.5.16 and Java from 11 to 21.
+- Updated JPA and JAX-WS imports from `javax` to `jakarta`.
+- Replaced the JAX-WS `jaxws-ri` 2.3 dependency with the `jaxws-rt` 4.0 runtime.
+- Migrated to the Hibernate 6 and Liquibase 4 versions managed by Spring Boot 3.5.
+- Added a JPA converter so H2 enum labels map correctly without changing the existing schema.
 
  ## Implementation Details
  
@@ -110,4 +118,3 @@ soap.endpoint.name=baws
  - build the project by executing:  ```mvn clean install```
  - run the application by executing:  ```mvn spring-boot:run```
  - Access the wsdl in url: ```http://localhost:8888/baws?wsdl``` to check if application started correctly.
-
