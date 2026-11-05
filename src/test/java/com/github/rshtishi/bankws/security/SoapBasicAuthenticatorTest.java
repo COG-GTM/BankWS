@@ -80,4 +80,15 @@ class SoapBasicAuthenticatorTest {
 		assertFalse(authenticator.checkCredentials(USER, SECRET + "x"));
 		assertFalse(authenticator.checkCredentials(USER, null));
 	}
+
+	@Test
+	public void testValidLoginsDoNotResetFailureCount() {
+		for (int i = 0; i < 2; i++) {
+			authenticator.authenticate(request("10.0.0.5", "admin", "guess" + i));
+			assertTrue(authenticator.authenticate(request("10.0.0.5", USER, SECRET)) instanceof Authenticator.Success);
+		}
+		authenticator.authenticate(request("10.0.0.5", "admin", "guess2"));
+		Authenticator.Result throttled = authenticator.authenticate(request("10.0.0.5", USER, SECRET));
+		assertEquals(429, ((Authenticator.Failure) throttled).getResponseCode());
+	}
 }

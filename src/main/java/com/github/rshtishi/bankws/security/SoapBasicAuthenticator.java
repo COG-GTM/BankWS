@@ -58,12 +58,9 @@ public class SoapBasicAuthenticator extends BasicAuthenticator {
 		}
 		Result result = super.authenticate(exchange);
 		boolean attempted = exchange.getRequestHeaders().getFirst("Authorization") != null;
-		if (remote != null && attempted) {
-			if (result instanceof Success) {
-				failures.remove(remote);
-			} else {
-				recordFailure(remote, now);
-			}
+		// Successes do not reset the counter, so valid logins cannot mask guesses against other users.
+		if (remote != null && attempted && !(result instanceof Success)) {
+			recordFailure(remote, now);
 		}
 		return result;
 	}
