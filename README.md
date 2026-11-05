@@ -104,10 +104,36 @@ soap.endpoint.port=8888
 soap.endpoint.name=baws
 ```
 
+## Security
+
+The SOAP endpoint requires HTTP Basic authentication and authorizes every call:
+
+- `getTrasactionsForClient` only returns data for the clients listed for the caller (`soap.security.users.<user>.clients`).
+- `getTrasactions` (all clients) is restricted to users with `soap.security.users.<user>.admin=true`.
+- Unauthenticated requests get `401`; authenticated callers asking for data they may not see get an `Access denied` SOAP fault.
+- With no users configured every request is rejected.
+
+Passwords are stored as PBKDF2 hashes. Generate one with:
+```
+java -cp target/classes com.github.rshtishi.bankws.security.PasswordHashes
+```
+and configure the caller, preferably through environment variables rather than the properties file:
+```
+soap.security.users.partnera.password-hash=pbkdf2-sha256$310000$...
+soap.security.users.partnera.clients=kbalaj
+```
+
+The endpoint refuses to start on a non-loopback `soap.endpoint.host` over plain HTTP. To expose it to third parties configure TLS:
+```
+soap.endpoint.ssl.key-store=/path/to/keystore.p12
+soap.endpoint.ssl.key-store-password=${SOAP_KEYSTORE_PASSWORD}
+```
+(`soap.endpoint.allow-insecure-http=true` is only meant for deployments behind a TLS-terminating proxy.)
+
 ## Setting up the project
  
  - Clone the repository in your computer by executing: ```git clone https://github.com/rshtishi/BankWS.git```
  - build the project by executing:  ```mvn clean install```
  - run the application by executing:  ```mvn spring-boot:run```
- - Access the wsdl in url: ```http://localhost:8888/baws?wsdl``` to check if application started correctly.
+ - Access the wsdl in url: ```http://localhost:8888/baws?wsdl``` (with the credentials of a configured SOAP user) to check if application started correctly.
 
