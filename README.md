@@ -108,6 +108,14 @@ soap.endpoint.name=baws
  
  - Clone the repository in your computer by executing: ```git clone https://github.com/rshtishi/BankWS.git```
  - build the project by executing:  ```mvn clean install```
+ - the SOAP endpoint is served over HTTPS only; the application refuses to start without a key store. For local development generate a self-signed one:
+   ```
+   keytool -genkeypair -alias bankws -keyalg RSA -keysize 2048 -validity 365 -dname CN=localhost \
+     -ext SAN=dns:localhost,ip:127.0.0.1 -storetype PKCS12 -keystore bankws.p12
+   export SOAP_SSL_KEY_STORE=bankws.p12
+   export SOAP_SSL_KEY_STORE_PASSWORD=<the store password you chose>
+   ```
+   In other environments point `soap.endpoint.ssl.key-store` (file path, `file:` or `classpath:` URL) at a key store holding a CA-issued certificate. Optional properties: `soap.endpoint.ssl.key-store-type` (default `PKCS12`), `soap.endpoint.ssl.key-password`, `soap.endpoint.ssl.protocols` (default `TLSv1.3,TLSv1.2`).
  - run the application by executing:  ```mvn spring-boot:run```
- - Access the wsdl in url: ```http://localhost:8888/baws?wsdl``` to check if application started correctly.
+ - Access the wsdl in url: ```https://localhost:8888/baws?wsdl``` to check if application started correctly (`curl -k` or `--cacert` for a self-signed certificate). Plain `http://` requests are rejected.
 

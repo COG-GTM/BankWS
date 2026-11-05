@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.github.rshtishi.bankws.support.SoapTlsTestSupport;
+
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-class SoapPropertiesTest {
+class SoapPropertiesTest extends SoapTlsTestSupport {
 	
 	@Autowired
 	private  SoapProperties soapProperties;

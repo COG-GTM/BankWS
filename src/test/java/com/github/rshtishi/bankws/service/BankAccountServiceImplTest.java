@@ -11,10 +11,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.github.rshtishi.bankws.entity.Transaction;
+import com.github.rshtishi.bankws.support.SoapTlsTestSupport;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-class BankAccountServiceImplTest {
+class BankAccountServiceImplTest extends SoapTlsTestSupport {
 
 	@Autowired
 	private BankAccountService bankAccountService;
