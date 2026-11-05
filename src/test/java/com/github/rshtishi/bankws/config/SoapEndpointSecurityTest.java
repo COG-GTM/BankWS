@@ -33,10 +33,10 @@ class SoapEndpointSecurityTest {
 	@DynamicPropertySource
 	static void soapUsers(DynamicPropertyRegistry registry) {
 		registry.add("soap.security.users." + PARTNER + ".password-hash",
-				() -> PasswordHashes.hash(PARTNER_SECRET.toCharArray(), 1_000));
+				() -> PasswordHashes.hash(PARTNER_SECRET.toCharArray(), PasswordHashes.MIN_ITERATIONS));
 		registry.add("soap.security.users." + PARTNER + ".clients", () -> "kbalaj");
 		registry.add("soap.security.users." + ADMIN + ".password-hash",
-				() -> PasswordHashes.hash(ADMIN_SECRET.toCharArray(), 1_000));
+				() -> PasswordHashes.hash(ADMIN_SECRET.toCharArray(), PasswordHashes.MIN_ITERATIONS));
 		registry.add("soap.security.users." + ADMIN + ".admin", () -> "true");
 	}
 

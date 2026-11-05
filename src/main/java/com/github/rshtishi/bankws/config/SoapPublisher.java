@@ -53,14 +53,30 @@ public class SoapPublisher {
 			log.warn("No soap.security.users configured: every SOAP request will be rejected");
 		}
 
-		this.server = this.createServer(config, tls);
-		this.executor = Executors.newFixedThreadPool(WORKER_THREADS);
-		this.server.setExecutor(this.executor);
-		HttpContext context = this.server.createContext("/" + config.getName());
-		context.setAuthenticator(new SoapBasicAuthenticator(this.soapProperties.getSecurity()));
-		this.endpoint = Endpoint.create(this.bankAccountService);
-		this.endpoint.publish(context);
-		this.server.start();
+		HttpServer httpServer = this.createServer(config, tls);
+		ExecutorService workers = null;
+		Endpoint published = null;
+		try {
+			workers = Executors.newFixedThreadPool(WORKER_THREADS);
+			httpServer.setExecutor(workers);
+			HttpContext context = httpServer.createContext("/" + config.getName());
+			context.setAuthenticator(new SoapBasicAuthenticator(this.soapProperties.getSecurity()));
+			published = Endpoint.create(this.bankAccountService);
+			published.publish(context);
+			httpServer.start();
+		} catch (RuntimeException | Error e) {
+			if (published != null) {
+				published.stop();
+			}
+			httpServer.stop(0);
+			if (workers != null) {
+				workers.shutdownNow();
+			}
+			throw e;
+		}
+		this.server = httpServer;
+		this.executor = workers;
+		this.endpoint = published;
 		log.info("SOAP endpoint published at {}", this.getUrl());
 	}
 
@@ -70,7 +86,9 @@ public class SoapPublisher {
 
 	public String getUrl() {
 		StringBuilder builder = new StringBuilder(this.server instanceof HttpsServer ? "https://" : "http://");
-		builder.append(this.soapProperties.getEndpoint().getHost());
+		String host = this.soapProperties.getEndpoint().getHost();
+		boolean ipv6Literal = host.indexOf(':') >= 0 && !host.startsWith("[");
+		builder.append(ipv6Literal ? "[" + host + "]" : host);
 		builder.append(":");
 		builder.append(this.server.getAddress().getPort());
 		builder.append("/");

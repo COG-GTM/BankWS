@@ -21,11 +21,13 @@ import javax.crypto.spec.PBEKeySpec;
 public final class PasswordHashes {
 
 	public static final int DEFAULT_ITERATIONS = 310_000;
+	public static final int MIN_ITERATIONS = 100_000;
 
 	private static final String PREFIX = "pbkdf2-sha256";
 	private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
 	private static final int SALT_BYTES = 16;
 	private static final int HASH_BITS = 256;
+	private static final int MIN_HASH_BYTES = HASH_BITS / 8;
 	private static final SecureRandom RANDOM = new SecureRandom();
 
 	private PasswordHashes() {
@@ -36,6 +38,9 @@ public final class PasswordHashes {
 	}
 
 	public static String hash(char[] password, int iterations) {
+		if (iterations < MIN_ITERATIONS) {
+			throw new IllegalArgumentException("PBKDF2 iterations must be at least " + MIN_ITERATIONS);
+		}
 		byte[] salt = new byte[SALT_BYTES];
 		RANDOM.nextBytes(salt);
 		byte[] hash = pbkdf2(password, salt, iterations, HASH_BITS);
@@ -55,7 +60,7 @@ public final class PasswordHashes {
 			int iterations = Integer.parseInt(parts[1]);
 			byte[] salt = Base64.getDecoder().decode(parts[2]);
 			byte[] expected = Base64.getDecoder().decode(parts[3]);
-			if (iterations < 1 || salt.length == 0 || expected.length == 0) {
+			if (iterations < MIN_ITERATIONS || salt.length < SALT_BYTES || expected.length < MIN_HASH_BYTES) {
 				return false;
 			}
 			byte[] actual = pbkdf2(password, salt, iterations, expected.length * 8);

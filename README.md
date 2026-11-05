@@ -111,9 +111,10 @@ The SOAP endpoint requires HTTP Basic authentication and authorizes every call:
 - `getTrasactionsForClient` only returns data for the clients listed for the caller (`soap.security.users.<user>.clients`).
 - `getTrasactions` (all clients) is restricted to users with `soap.security.users.<user>.admin=true`.
 - Unauthenticated requests get `401`; authenticated callers asking for data they may not see get an `Access denied` SOAP fault.
+- A client address with 10 failed logins within a minute gets `429` (without running PBKDF2) until the window expires; recently verified credentials are cached in memory for 5 minutes so valid callers do not pay the PBKDF2 cost on every request. Large distributed floods still need network-level rate limiting.
 - With no users configured every request is rejected.
 
-Passwords are stored as PBKDF2 hashes. Generate one with:
+Passwords are stored as PBKDF2 hashes (at least 100,000 iterations, 16-byte salt and 32-byte hash; weaker hashes are rejected). Generate one with:
 ```
 java -cp target/classes com.github.rshtishi.bankws.security.PasswordHashes
 ```
