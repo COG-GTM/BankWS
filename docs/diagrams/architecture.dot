@@ -1,0 +1,55 @@
+// BankWS architecture (master). Render with ./render.sh
+digraph BankWS {
+  graph [rankdir=TB, fontname="DejaVu Sans", fontsize=18, labelloc=t, nodesep=0.5, ranksep=0.6, pad=0.3,
+         label="BankWS — what runs on master"];
+  node  [shape=box, style="rounded,filled", fillcolor=white, fontname="DejaVu Sans", fontsize=16, margin="0.2,0.12"];
+  edge  [fontname="DejaVu Sans", fontsize=13, color="#475569"];
+
+  client [label="Third-party SOAP client\n(any platform)", shape=box, fillcolor="#E0F2FE"];
+  browser [label="Developer browser", fillcolor="#E0F2FE"];
+
+  subgraph cluster_jvm {
+    label="Spring Boot 2.3.0 app — one JVM (BankWsApplication)"; style="rounded,filled"; fillcolor="#F8FAFC"; color="#94A3B8"; fontsize=16;
+
+    subgraph cluster_jaxws {
+      label="JAX-WS RI 2.3.0 HTTP server\nlocalhost:8888 /baws  (WSDL: /baws?wsdl)"; style="rounded"; color="#0EA5E9";
+      publisher [label="SoapPublisher\nEndpoint.publish(url, service)"];
+      sei [label="BankAccountService (SEI)\ngetTrasactions()\ngetTrasactionsForClient(arg0)"];
+    }
+
+    subgraph cluster_tomcat {
+      label="Embedded Tomcat :8080"; style="rounded"; color="#64748B";
+      h2console [label="H2 console\n/h2-console"];
+      springws [label="Spring-WS MessageDispatcherServlet\n/services/*  (no endpoints)", fillcolor="#F1F5F9", fontcolor="#64748B"];
+    }
+
+    props [label="SoapProperties\nsoap.endpoint.host/port/name\n(application.properties)", fillcolor="#FEF9C3"];
+    impl [label="BankAccountServiceImpl (SIB)\n@Service @WebService(serviceName=\"bank-account\")"];
+    repo [label="TransactionRepository\nSpring Data CrudRepository\nfindAll() / findByClient()"];
+    entity [label="Transaction @Entity\nid, client, date, amount, actionType", fillcolor="#FEF9C3"];
+    liquibase [label="Liquibase 3.8.9 (on startup)\n01 create type + table\n02 insert 5 seed rows", fillcolor="#FEF9C3"];
+    h2 [label="H2 1.4.200 in-memory\njdbc:h2:mem:bankdb\ntable bank_transaction", shape=cylinder, fillcolor="#DCFCE7"];
+
+    {rank=same; impl; props}
+    {rank=same; repo; liquibase}
+  }
+
+  subgraph cluster_side {
+    label="Not part of the service (static demo content)"; style="rounded,dashed"; color="#A78BFA"; fontsize=16;
+    site [label="site/index.html + vercel.json\nstatic SPA, client-side code gate"];
+    demos [label="demos/\nPython GitHub→SQLite ingest,\ndbt model files, triage notes"];
+    {rank=same; site; demos}
+  }
+
+  client -> sei [label=" SOAP 1.1 over HTTP"];
+  props -> publisher [label=" builds URL", style=dashed];
+  publisher -> sei [style=dashed, arrowhead=none];
+  sei -> impl [label=" dispatch"];
+  impl -> repo;
+  repo -> entity [style=dashed, arrowhead=none];
+  repo -> h2 [label=" JPA / Hibernate 5.4"];
+  liquibase -> h2 [label=" schema + seed"];
+  browser -> h2console;
+  h2console -> h2;
+  h2 -> site [style=invis];
+}
