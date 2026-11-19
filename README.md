@@ -9,15 +9,30 @@ A bank has many third-party application that need to access the user transaction
 in the core system of the bank. The third-party applications are written with different technologies stack. We need to provide a way 
 to expose the information from the core system of the bank in safe manner to all third-party application who need this information.
 
+## Architecture
+
+See [docs/architecture.md](docs/architecture.md) for how the service is wired together, the live SOAP contract and what else is in this repository.
+
+![BankWS architecture](docs/diagrams/architecture.png)
+
+## Repository layout
+
+| Path | Contents |
+|------|----------|
+| `src/` | The BankWS Spring Boot SOAP service and its tests |
+| `site/` | Static "Devin for Data Engineering" demo page (`index.html`, `vercel.json`); not used by the service |
+| `demos/` | Barclays EDP demo artifacts (Python ingestion, dbt models, pipeline triage); see [demos/README.md](demos/README.md) |
+| `docs/` | Architecture doc and diagram source |
+
 ## Technology
 
 BankWS is using the following technologies:
-- Java [version: 11] (the language used to write the application)
+- Java [version: 11] (the language used to write the application; build with JDK 11, because Lombok 1.18.12 fails to compile on newer JDKs such as 21)
 - Maven [version:3.6] (the tool for managing dependencies and building the project) 
 - Lombok [version:1.18.12] (the java library for removing boiler plate code from pojos)
 - Spring-Boot [version:2.3.0.RELEASE] (the framework for creating spring application that just run)
 - Spring-Data [version:2.3.0.RELEASE] (the framework for interacting with database)
-- H2 Database [version:1.4.2] (the database we use for storing the information in development enviroment)
+- H2 Database [version:1.4.200] (the database we use for storing the information in development enviroment)
 - Liquibase [version:3.8.9] (the tool for keeping the version control for relational databases)
 - JAX-WS [version:2.3.0] (the library for exposing soap web service endpoints)
 
@@ -68,6 +83,8 @@ public class BankAccountServiceImpl implements BankAccountService {
 ```
 *BankAccountServiceImpl* is SIB that provides the implementation of the operations specified in SEI.
 
+Because the SIB sets `endpointInterface`, JAX-WS builds the WSDL from the SEI and ignores the `operationName`/`name` values on the SIB. The published operations are therefore `getTrasactions` and `getTrasactionsForClient`, and the client parameter element is `arg0`.
+
 Below we publish the endopoint for the *BankAccountService* SOAP-based web service:
 ```
 @Configuration
@@ -106,8 +123,12 @@ soap.endpoint.name=baws
 
 ## Setting up the project
  
- - Clone the repository in your computer by executing: ```git clone https://github.com/rshtishi/BankWS.git```
- - build the project by executing:  ```mvn clean install```
- - run the application by executing:  ```mvn spring-boot:run```
- - Access the wsdl in url: ```http://localhost:8888/baws?wsdl``` to check if application started correctly.
-
+ - Clone the repository: ```git clone https://github.com/COG-GTM/BankWS.git```
+ - Use JDK 11 (for example `export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64`).
+ - Build and run the tests: ```sh mvnw clean install``` (or ```mvn clean install```). `mvnw` is committed without the executable bit, so call it through `sh`.
+ - Run the application: ```sh mvnw spring-boot:run```
+ - Open the WSDL at ```http://localhost:8888/baws?wsdl``` to check that the application started. The H2 console is at ```http://localhost:8080/h2-console```.
+ - Call an operation, for example:
+   ```
+   curl -s -H 'Content-Type: text/xml; charset=utf-8' -H 'SOAPAction: ""' http://localhost:8888/baws -d '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://service.bankws.rshtishi.github.com/"><soapenv:Body><ser:getTrasactionsForClient><arg0>kbalaj</arg0></ser:getTrasactionsForClient></soapenv:Body></soapenv:Envelope>'
+   ```
