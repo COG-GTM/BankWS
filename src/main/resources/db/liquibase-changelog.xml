@@ -8,5 +8,7 @@
 		relativeToChangelogFile="true" />
 	<include file="changelog/02-data-insert-transaction.xml"
 		relativeToChangelogFile="true" />
+	<include file="changelog/03-index-transaction-client.xml"
+		relativeToChangelogFile="true" />
 
 </databaseChangeLog>
