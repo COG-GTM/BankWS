@@ -44,7 +44,7 @@ class BankAccountServiceImplTest {
 		assertEquals(clientExpected, transactions.get(0).getClient());
 		assertEquals(amountExpected, transactions.get(0).getAmount());
 		assertEquals(actionTypeExpected, transactions.get(0).getActionType());
-		assertEquals(ActionType.WITHDRAW, transactions.get(2).getActionType());
+		assertEquals(ActionType.WITHDRAW, transactions.stream().filter(t -> t.getId() == 3).findFirst().orElseThrow().getActionType());
 	}
 
 }
