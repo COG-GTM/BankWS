@@ -1,7 +1,9 @@
 package com.github.rshtishi.bankws.config;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import jakarta.annotation.PreDestroy;
 import jakarta.xml.ws.Endpoint;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,15 +16,24 @@ public class SoapPublisher {
 
 	private BankAccountService bankAccountService;
 	private SoapProperties soapProperties;
+	private final ExecutorService requestExecutor;
+	private final Endpoint endpoint;
 
 	@Autowired
 	public SoapPublisher(BankAccountService bankAccountService, SoapProperties soapProperties) {
 		this.bankAccountService = bankAccountService;
 		this.soapProperties = soapProperties;
 		final String url = this.createUrl();
-		Endpoint endpoint = Endpoint.create(this.bankAccountService);
-		endpoint.setExecutor(Executors.newCachedThreadPool(this::createRequestThread));
-		endpoint.publish(url);
+		this.requestExecutor = Executors.newCachedThreadPool(this::createRequestThread);
+		this.endpoint = Endpoint.create(this.bankAccountService);
+		this.endpoint.setExecutor(this.requestExecutor);
+		this.endpoint.publish(url);
+	}
+
+	@PreDestroy
+	public void stop() {
+		this.endpoint.stop();
+		this.requestExecutor.shutdown();
 	}
 
 	// Request threads must see the application class loader so JAX-WS/JAXB can
