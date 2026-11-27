@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.github.rshtishi.bankws.entity.Transaction;
+import com.github.rshtishi.bankws.enums.ActionType;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -35,12 +36,15 @@ class BankAccountServiceImplTest {
 		int idExpected = 1;
 		String clientExpected = "rshtishi";
 		double amountExpected = 500.00;
+		ActionType actionTypeExpected = ActionType.DEPOSIT;
 		// execute
 		List<Transaction> transactions = bankAccountService.getTrasactionsForClient(clientExpected);
 		// verify
 		assertEquals(idExpected, transactions.get(0).getId());
 		assertEquals(clientExpected, transactions.get(0).getClient());
 		assertEquals(amountExpected, transactions.get(0).getAmount());
+		assertEquals(actionTypeExpected, transactions.get(0).getActionType());
+		assertEquals(ActionType.WITHDRAW, transactions.stream().filter(t -> t.getId() == 3).findFirst().orElseThrow().getActionType());
 	}
 
 }
