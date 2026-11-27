@@ -12,14 +12,14 @@ to expose the information from the core system of the bank in safe manner to all
 ## Technology
 
 BankWS is using the following technologies:
-- Java [version: 11] (the language used to write the application)
-- Maven [version:3.6] (the tool for managing dependencies and building the project) 
-- Lombok [version:1.18.12] (the java library for removing boiler plate code from pojos)
-- Spring-Boot [version:2.3.0.RELEASE] (the framework for creating spring application that just run)
-- Spring-Data [version:2.3.0.RELEASE] (the framework for interacting with database)
-- H2 Database [version:1.4.2] (the database we use for storing the information in development enviroment)
-- Liquibase [version:3.8.9] (the tool for keeping the version control for relational databases)
-- JAX-WS [version:2.3.0] (the library for exposing soap web service endpoints)
+- Java [version: 21] (the language used to write the application)
+- Maven [version:3.9] (the tool for managing dependencies and building the project) 
+- Lombok [version:1.18.48] (the java library for removing boiler plate code from pojos)
+- Spring-Boot [version:4.1.3] (the framework for creating spring application that just run)
+- Spring-Data [version: managed by Spring Boot 4.1.3] (the framework for interacting with database)
+- H2 Database [version:2.4.240] (the database we use for storing the information in development enviroment)
+- Liquibase [version:5.0.4] (the tool for keeping the version control for relational databases)
+- JAX-WS (Jakarta XML Web Services RI) [version:4.0.5] (the library for exposing soap web service endpoints)
 
  ## Implementation Details
  
